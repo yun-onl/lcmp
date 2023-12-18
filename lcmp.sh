@@ -435,9 +435,9 @@ if check_sys rhel; then
         _error_detect "yum install -yq ${remi_php}"
     fi
     _error_detect "yum install -yq ${remi_php}-php-common ${remi_php}-php-fpm ${remi_php}-php-cli ${remi_php}-php-bcmath ${remi_php}-php-embedded ${remi_php}-php-gd ${remi_php}-php-imap ${remi_php}-php-mysqlnd ${remi_php}-php-dba ${remi_php}-php-pdo ${remi_php}-php-pdo-dblib"
-    _error_detect "yum install -yq ${remi_php}-php-pgsql ${remi_php}-php-odbc ${remi_php}-php-enchant ${remi_php}-php-gmp ${remi_php}-php-intl ${remi_php}-php-ldap ${remi_php}-php-snmp ${remi_php}-php-soap ${remi_php}-php-tidy ${remi_php}-php-opcache ${remi_php}-php-process"
+    _error_detect "yum install -yq ${remi_php}-php-pgsql ${remi_php}-php-enchant ${remi_php}-php-gmp ${remi_php}-php-intl ${remi_php}-php-ldap ${remi_php}-php-snmp ${remi_php}-php-soap ${remi_php}-php-tidy ${remi_php}-php-opcache ${remi_php}-php-process"
     _error_detect "yum install -yq ${remi_php}-php-pspell ${remi_php}-php-shmop ${remi_php}-php-sodium ${remi_php}-php-ffi ${remi_php}-php-brotli ${remi_php}-php-lz4 ${remi_php}-php-xz ${remi_php}-php-zstd ${remi_php}-php-pecl-rar"
-    _error_detect "yum install -yq ${remi_php}-php-pecl-imagick-im7 ${remi_php}-php-pecl-zip ${remi_php}-php-pecl-mongodb ${remi_php}-php-pecl-grpc ${remi_php}-php-pecl-yaml ${remi_php}-php-pecl-uuid composer"
+    _error_detect "yum install -yq ${remi_php}-php-pecl-imagick-im7 ${remi_php}-php-pecl-zip ${remi_php}-php-pecl-grpc ${remi_php}-php-pecl-yaml ${remi_php}-php-pecl-uuid composer"
 elif check_sys debian || check_sys ubuntu; then
     php_conf="/etc/php/${php_ver}/fpm/pool.d/www.conf"
     php_ini="/etc/php/${php_ver}/fpm/php.ini"
@@ -452,9 +452,9 @@ elif check_sys debian || check_sys ubuntu; then
         _error_detect "add-apt-repository -y ppa:ondrej/php"
     fi
     _error_detect "apt-get update"
-    _error_detect "apt-get install -y php-common php${php_ver}-common php${php_ver}-cli php${php_ver}-fpm php${php_ver}-opcache php${php_ver}-readline"
-    _error_detect "apt-get install -y libphp${php_ver}-embed php${php_ver}-bcmath php${php_ver}-gd php${php_ver}-imap php${php_ver}-mysql php${php_ver}-dba php${php_ver}-mongodb php${php_ver}-sybase"
-    _error_detect "apt-get install -y php${php_ver}-pgsql php${php_ver}-odbc php${php_ver}-enchant php${php_ver}-gmp php${php_ver}-intl php${php_ver}-ldap php${php_ver}-snmp php${php_ver}-soap"
+    _error_detect "apt-get install -y php${php_ver}-common php${php_ver}-cli php${php_ver}-fpm php${php_ver}-opcache php${php_ver}-readline"
+    _error_detect "apt-get install -y libphp${php_ver}-embed php${php_ver}-bcmath php${php_ver}-gd php${php_ver}-imap php${php_ver}-mysql php${php_ver}-dba php${php_ver}-sybase"
+    _error_detect "apt-get install -y php${php_ver}-pgsql php${php_ver}-enchant php${php_ver}-gmp php${php_ver}-intl php${php_ver}-ldap php${php_ver}-snmp php${php_ver}-soap"
     _error_detect "apt-get install -y php${php_ver}-mbstring php${php_ver}-curl php${php_ver}-pspell php${php_ver}-xml php${php_ver}-zip php${php_ver}-bz2 php${php_ver}-lz4 php${php_ver}-zstd"
     _error_detect "apt-get install -y php${php_ver}-tidy php${php_ver}-sqlite3 php${php_ver}-imagick php${php_ver}-grpc php${php_ver}-yaml php${php_ver}-uuid"
     _error_detect "mkdir -m770 /var/lib/php/{session,wsdlcache,opcache}"
@@ -469,7 +469,7 @@ sed -i "s@^user.*@user = caddy@" "${php_conf}"
 sed -i "s@^group.*@group = caddy@" "${php_conf}"
 if check_sys rhel; then
     sed -i "s@^listen.acl_users.*@listen.acl_users = apache,nginx,caddy@" "${php_conf}"
-    sed -i "s@^;php_value\[opcache.file_cache\].*@php_value\[opcache.file_cache\] = /var/lib/php/opcache@" "${php_conf}"
+    sed -i "s@^;php_value\[opcache.file_cache\].*@php_value\[opcache.file_cache\] = /var/opt/remi/${remi_php}/lib/php/opcache@" "${php_conf}"
 elif check_sys debian || check_sys ubuntu; then
     sed -i "s@^listen.owner.*@;&@" "${php_conf}"
     sed -i "s@^listen.group.*@;&@" "${php_conf}"
@@ -498,9 +498,15 @@ sed -i "s@^expose_php.*@expose_php = Off@" "${php_ini}"
 sed -i "s@^short_open_tag.*@short_open_tag = On@" "${php_ini}"
 sed -i "s#mysqli.default_socket.*#mysqli.default_socket = ${sock_location}#" "${php_ini}"
 sed -i "s#pdo_mysql.default_socket.*#pdo_mysql.default_socket = ${sock_location}#" "${php_ini}"
-_error_detect "chown root:caddy /var/lib/php/session"
-_error_detect "chown root:caddy /var/lib/php/wsdlcache"
-_error_detect "chown root:caddy /var/lib/php/opcache"
+if check_sys rhel; then
+    _error_detect "chown root:caddy /var/opt/remi/${remi_php}/lib/php/session"
+    _error_detect "chown root:caddy /var/opt/remi/${remi_php}/lib/php/wsdlcache"
+    _error_detect "chown root:caddy /var/opt/remi/${remi_php}/lib/php/opcache"
+elif check_sys debian || check_sys ubuntu; then 
+    _error_detect "chown root:caddy /var/lib/php/session"
+    _error_detect "chown root:caddy /var/lib/php/wsdlcache"
+    _error_detect "chown root:caddy /var/lib/php/opcache"
+fi
 _info "Set PHP completed"
 
 cat >/etc/caddy/conf.d/default.conf <<EOF
