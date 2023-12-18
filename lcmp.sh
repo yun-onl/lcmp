@@ -428,11 +428,11 @@ if check_sys rhel; then
     sock_location="/var/lib/mysql/mysql.sock"
     if get_rhelversion 8; then
         _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
-        _error_detect "yum module install -yq ${remi_php}"
+        _error_detect "yum install -yq ${remi_php}"
     fi
     if get_rhelversion 9; then
         _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
-        _error_detect "yum module install -yq ${remi_php}"
+        _error_detect "yum install -yq ${remi_php}"
     fi
     _error_detect "yum install -yq ${remi_php}-php-common ${remi_php}-php-fpm ${remi_php}-php-cli ${remi_php}-php-bcmath ${remi_php}-php-embedded ${remi_php}-php-gd ${remi_php}-php-imap ${remi_php}-php-mysqlnd ${remi_php}-php-dba ${remi_php}-php-pdo ${remi_php}-php-pdo-dblib"
     _error_detect "yum install -yq ${remi_php}-php-pgsql ${remi_php}-php-odbc ${remi_php}-php-enchant ${remi_php}-php-gmp ${remi_php}-php-intl ${remi_php}-php-ldap ${remi_php}-php-snmp ${remi_php}-php-soap ${remi_php}-php-tidy ${remi_php}-php-opcache ${remi_php}-php-process"
