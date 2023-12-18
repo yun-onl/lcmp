@@ -375,7 +375,6 @@ cat >/etc/caddy/Caddyfile <<EOF
 }
 import /etc/caddy/conf.d/*.conf
 EOF
-_error_detect "cp -f ${cur_dir}/conf/favicon.ico /data/www/default/"
 _error_detect "cp -f ${cur_dir}/conf/index.html /data/www/default/"
 _error_detect "cp -f ${cur_dir}/conf/lcmp.png /data/www/default/"
 _info "Set Caddy completed"
