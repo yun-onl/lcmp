@@ -422,19 +422,17 @@ _info "/usr/bin/mysql -uroot -p 2>/dev/null < /data/www/default/pma/sql/create_t
 _info "Set MariaDB completed"
 
 if check_sys rhel; then
-    php_conf="/etc/php-fpm.d/www.conf"
-    php_ini="/etc/php.ini"
-    php_fpm="php-fpm"
-    php_sock="unix//run/php-fpm/www.sock"
+    php_conf="/etc/opt/remi/${remi_php}/php-fpm.d/www.conf"
+    php_ini="/etc/opt/remi/${remi_php}/php.ini"
+    php_fpm="${remi_php}-php-fpm"
+    php_sock="unix//var/opt/remi/php80/run/php-fpm/www.sock"
     sock_location="/var/lib/mysql/mysql.sock"
     if get_rhelversion 8; then
         _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
-        _error_detect "yum module reset -yq php"
         _error_detect "yum module install -yq ${remi_php}"
     fi
     if get_rhelversion 9; then
         _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
-        _error_detect "yum module reset -yq php"
         _error_detect "yum module install -yq ${remi_php}"
     fi
     _error_detect "yum install -yq ${remi_php}-php-common ${remi_php}-php-fpm ${remi_php}-php-cli ${remi_php}-php-bcmath ${remi_php}-php-embedded ${remi_php}-php-gd ${remi_php}-php-imap ${remi_php}-php-mysqlnd ${remi_php}-php-dba ${remi_php}-php-pdo ${remi_php}-php-pdo-dblib"
@@ -445,7 +443,7 @@ elif check_sys debian || check_sys ubuntu; then
     php_conf="/etc/php/${php_ver}/fpm/pool.d/www.conf"
     php_ini="/etc/php/${php_ver}/fpm/php.ini"
     php_fpm="php${php_ver}-fpm"
-    php_sock="unix//run/php/php-fpm.sock"
+    php_sock="unix//run/php/php${php_ver}-fpm.sock"
     sock_location="/run/mysqld/mysqld.sock"
     if check_sys debian; then
         _error_detect "curl -sSLo /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg"
@@ -462,6 +460,10 @@ elif check_sys debian || check_sys ubuntu; then
     _error_detect "apt-get install -y php${php_ver}-tidy php${php_ver}-sqlite3 php${php_ver}-imagick php${php_ver}-grpc php${php_ver}-yaml php${php_ver}-uuid"
     _error_detect "mkdir -m770 /var/lib/php/{session,wsdlcache,opcache}"
 fi
+_error_detect "mkdir -p /etc/lcmp/"
+_error_detect "echo "${php_ver}" > /etc/lcmp/phpver"
+_error_detect "echo "${remi_php}" > /etc/lcmp/remiphpver"
+
 _info "PHP installation completed"
 
 sed -i "s@^user.*@user = caddy@" "${php_conf}"

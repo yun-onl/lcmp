@@ -428,14 +428,15 @@ lcmp_status() {
 
 check_env() {
     if check_sys rhel; then
-        php_sock="unix//run/php-fpm/www.sock"
-        php_fpm="php-fpm"
+        remi_php=$(cat /etc/lcmp/remiphpver)
+        php_sock="unix//var/opt/remi/${remi_php}/run/php-fpm/www.sock"
+        php_fpm="${remi_php}-php-fpm"
     elif check_sys debian || check_sys ubuntu; then
-        php_sock="unix//run/php/php-fpm.sock"
-        php_ver="$(/usr/bin/php -v | head -n1 | awk '{print $2}' | cut -d. -f1-2)"
+        php_ver=$(cat /etc/lcmp/phpver)
+        php_sock="unix//run/php/php${php_ver}-fpm.sock"
         php_fpm="php${php_ver}-fpm"
     else
-        _error "Not supported OS, please change OS to Enterprise Linux 7+ or Debian 10+ or Ubuntu 20.04+ and try again."
+        _error "Not supported OS, please change OS to Enterprise Linux 8+ or Debian 10+ or Ubuntu 20.04+ and try again."
     fi
 }
 
