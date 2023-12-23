@@ -190,6 +190,7 @@ add_vhost() {
         add_database
     fi
     _error_detect "systemctl restart caddy"
+_error_detect "cp -f /etc/lcmp/vhost.html ${vhostdir}"
     _info "Virtual host infomation:"
     _info "Domain name: $(_green "${domain}")"
     _info "Virtual host directory: $(_green "${vhostdir}")"

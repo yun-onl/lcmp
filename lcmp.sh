@@ -407,6 +407,7 @@ _info "Caddy installation completed"
 _error_detect "mkdir -p /data/www/default"
 _error_detect "mkdir -p /var/log/caddy/"
 _error_detect "mkdir -p /etc/caddy/conf.d/"
+_error_detect "mkdir /etc/lcmp"
 _error_detect "chown -R caddy:caddy /var/log/caddy/"
 cat >/etc/caddy/Caddyfile <<EOF
 {
@@ -416,6 +417,7 @@ import /etc/caddy/conf.d/*.conf
 EOF
 _error_detect "cp -f ${cur_dir}/conf/index.html /data/www/default/"
 _error_detect "cp -f ${cur_dir}/conf/x.php /data/www/default/"
+_error_detect "cp -f ${cur_dir}/conf/vhost.html /etc/lcmp/"
 _error_detect "cp -f ${cur_dir}/conf/lcmp.png /data/www/default/"
 _info "Set Caddy completed"
 
@@ -423,9 +425,6 @@ _info "Set Caddy completed"
 ## 安装数据库
 
 if [ "$mariadb_ver" -eq 0 ]; then
-    if [ ! -d "/etc/lcmp" ]; then
-        _error_detect "sudo mkdir /etc/lcmp"
-    fi
     _error_detect "touch /etc/lcmp/donotinstallmariadb"
 else
     _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
@@ -510,7 +509,6 @@ elif check_sys debian || check_sys ubuntu; then
     _error_detect "apt-get install -y php${php_ver}-tidy php${php_ver}-sqlite3 php${php_ver}-imagick php${php_ver}-grpc php${php_ver}-yaml php${php_ver}-uuid"
     _error_detect "mkdir -m770 /var/lib/php/${php_ver}/{session,wsdlcache,opcache}"
 fi
-_error_detect "mkdir -p /etc/lcmp/"
 _error_detect "echo "${php_ver}" > /etc/lcmp/phpver"
 _error_detect "echo "${remi_php}" > /etc/lcmp/remiphpver"
 
