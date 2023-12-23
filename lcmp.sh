@@ -441,6 +441,7 @@ else
         mariadb_cnf="/etc/MariaDB.conf.d/50-server.cnf"
     fi
     _info "MariaDB installation completed"
+fi
 
     lnum=$(sed -n '/\[mysqld\]/=' "${mariadb_cnf}")
     sed -i "${lnum}ainnodb_buffer_pool_size = 100M\nmax_allowed_packet = 1024M\nnet_read_timeout = 3600\nnet_write_timeout = 3600" "${mariadb_cnf}"
@@ -458,7 +459,7 @@ else
     delete from mysql.user where user='PUBLIC';
     flush privileges;
     exit
-    EOF
+EOF
     _error_detect "cd /data/www/default"
     # Install phpMyAdmin
     _error_detect "wget -q https://dl.lamp.sh/files/pma.tar.gz"
@@ -468,7 +469,7 @@ else
     _info "/usr/bin/mysql -uroot -p 2>/dev/null < /data/www/default/pma/sql/create_tables.sql"
     /usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null </data/www/default/pma/sql/create_tables.sql
     _info "Set MariaDB ${mariadb_ver} completed"
-fi
+
 
 if check_sys rhel; then
     php_conf="/etc/opt/remi/${remi_php}/php-fpm.d/www.conf"
