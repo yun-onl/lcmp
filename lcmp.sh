@@ -205,6 +205,45 @@ if  ! get_rhelversion 8 && ! get_rhelversion 9 &&
     ! get_ubuntuversion 20.04 && ! get_ubuntuversion 22.04; then
     _error "Not supported OS, please change OS to Enterprise Linux 8+ or Debian 10+ or Ubuntu 20.04+ and try again."
 fi
+
+# Install MariaDB
+
+while true; do
+    _info "Please choose a version of the MariaDB:"
+    _info "$(_green 1). Do not install the MariaDB database"
+    _info "$(_green 2). MariaDB 10.5"
+    _info "$(_green 3). MariaDB 10.6"
+    _info "$(_green 4). MariaDB 10.11(recommended)"
+    _info "$(_green 5). MariaDB 11.3(unstable)"
+    read -r -p "[$(date)] Please input a number: (Default 4) " mysql_version
+    [ -z "${mysql_version}" ] && mysql_version=4
+    case "${mysql_version}" in
+    1)
+        mariadb_ver="0"
+        break
+        ;;
+    2)
+        mariadb_ver="10.5"
+        break
+        ;;
+    3)
+        mariadb_ver="10.6"
+        break
+        ;;
+    4)
+        mariadb_ver="10.11"
+        break
+        ;;
+    5)
+        mariadb_ver="11.3"
+        break
+        ;;
+    *)
+        _info "Input error! Please only input a number 1 2 3 4 5"
+        ;;
+    esac
+done
+
 # Set MariaDB root password
 _info "Please input the root password of MariaDB:"
 read -r -p "[$(date)] (Default password: lcmp-net):" db_pass
@@ -273,7 +312,7 @@ _info "---------------------------"
 _info "Press any key to start...or Press Ctrl+C to cancel"
 char=$(get_char)
 
-_info "VPS initialization start"
+_info "Server initialization start"
 _error_detect "rm -f /etc/localtime"
 _error_detect "ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime"
 if check_sys rhel; then
@@ -346,7 +385,7 @@ fi
 echo
 netstat -nxtulpe
 echo
-_info "VPS initialization completed"
+_info "Server initialization completed"
 sleep 3
 clear
 _info "LCMP (Linux + Caddy + MariaDB + PHP) installation start"
@@ -379,46 +418,56 @@ _error_detect "cp -f ${cur_dir}/conf/index.html /data/www/default/"
 _error_detect "cp -f ${cur_dir}/conf/lcmp.png /data/www/default/"
 _info "Set Caddy completed"
 
-_error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
-_error_detect "chmod +x mariadb_repo_setup.sh"
-_info "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-10.11"
-./mariadb_repo_setup.sh --mariadb-server-version=mariadb-10.11 >/dev/null 2>&1
-_error_detect "rm -f mariadb_repo_setup.sh"
-if check_sys rhel; then
-    _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
-    mariadb_cnf="/etc/my.cnf.d/server.cnf"
-elif check_sys debian || check_sys ubuntu; then
-    _error_detect "apt-get install -y mariadb-common mariadb-server mariadb-client mariadb-backup"
-    mariadb_cnf="/etc/mysql/mariadb.conf.d/50-server.cnf"
-fi
-_info "MariaDB installation completed"
 
-lnum=$(sed -n '/\[mysqld\]/=' "${mariadb_cnf}")
-sed -i "${lnum}ainnodb_buffer_pool_size = 100M\nmax_allowed_packet = 1024M\nnet_read_timeout = 3600\nnet_write_timeout = 3600" "${mariadb_cnf}"
-lnum=$(sed -n '/\[mariadb\]/=' "${mariadb_cnf}")
-sed -i "${lnum}acharacter-set-server = utf8mb4\n\n\[client-mariadb\]\ndefault-character-set = utf8mb4" "${mariadb_cnf}"
-_error_detect "systemctl start mariadb"
-/usr/bin/mysql -e "grant all privileges on *.* to root@'127.0.0.1' identified by \"${db_pass}\" with grant option;"
-/usr/bin/mysql -e "grant all privileges on *.* to root@'localhost' identified by \"${db_pass}\" with grant option;"
-/usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null <<EOF
-drop database if exists test;
-delete from mysql.db where user='';
-delete from mysql.db where user='PUBLIC';
-delete from mysql.user where user='';
-delete from mysql.user where user='mysql';
-delete from mysql.user where user='PUBLIC';
-flush privileges;
-exit
-EOF
-_error_detect "cd /data/www/default"
-# Install phpMyAdmin
-_error_detect "wget -q https://dl.lamp.sh/files/pma.tar.gz"
-_error_detect "tar zxf pma.tar.gz"
-_error_detect "rm -f pma.tar.gz"
-_error_detect "cd ${cur_dir}"
-_info "/usr/bin/mysql -uroot -p 2>/dev/null < /data/www/default/pma/sql/create_tables.sql"
-/usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null </data/www/default/pma/sql/create_tables.sql
-_info "Set MariaDB completed"
+## 安装数据库
+
+if [ "$mariadb_ver" -eq 0 ]; then
+    if [ ! -d "/etc/lcmp" ]; then
+        _error_detect "sudo mkdir /etc/lcmp"
+    fi
+    _error_detect "touch /etc/lcmp/donotinstallmariadb"
+else
+    _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
+    _error_detect "chmod +x mariadb_repo_setup.sh"
+    _info "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver}"
+    ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1
+    _error_detect "rm -f mariadb_repo_setup.sh"
+    if check_sys rhel; then
+        _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
+        mariadb_cnf="/etc/my.cnf.d/server.cnf"
+    elif check_sys debian || check_sys ubuntu; then
+        _error_detect "apt-get install -y mariadb-common mariadb-server mariadb-client mariadb-backup"
+        mariadb_cnf="/etc/MariaDB.conf.d/50-server.cnf"
+    fi
+    _info "MariaDB installation completed"
+
+    lnum=$(sed -n '/\[mysqld\]/=' "${mariadb_cnf}")
+    sed -i "${lnum}ainnodb_buffer_pool_size = 100M\nmax_allowed_packet = 1024M\nnet_read_timeout = 3600\nnet_write_timeout = 3600" "${mariadb_cnf}"
+    lnum=$(sed -n '/\[mariadb\]/=' "${mariadb_cnf}")
+    sed -i "${lnum}acharacter-set-server = utf8mb4\n\n\[client-mariadb\]\ndefault-character-set = utf8mb4" "${mariadb_cnf}"
+    _error_detect "systemctl start mariadb"
+    /usr/bin/mysql -e "grant all privileges on *.* to root@'127.0.0.1' identified by \"${db_pass}\" with grant option;"
+    /usr/bin/mysql -e "grant all privileges on *.* to root@'localhost' identified by \"${db_pass}\" with grant option;"
+    /usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null <<EOF
+    drop database if exists test;
+    delete from mysql.db where user='';
+    delete from mysql.db where user='PUBLIC';
+    delete from mysql.user where user='';
+    delete from mysql.user where user='mysql';
+    delete from mysql.user where user='PUBLIC';
+    flush privileges;
+    exit
+    EOF
+    _error_detect "cd /data/www/default"
+    # Install phpMyAdmin
+    _error_detect "wget -q https://dl.lamp.sh/files/pma.tar.gz"
+    _error_detect "tar zxf pma.tar.gz"
+    _error_detect "rm -f pma.tar.gz"
+    _error_detect "cd ${cur_dir}"
+    _info "/usr/bin/mysql -uroot -p 2>/dev/null < /data/www/default/pma/sql/create_tables.sql"
+    /usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null </data/www/default/pma/sql/create_tables.sql
+    _info "Set MariaDB ${mariadb_ver} completed"
+fi
 
 if check_sys rhel; then
     php_conf="/etc/opt/remi/${remi_php}/php-fpm.d/www.conf"
