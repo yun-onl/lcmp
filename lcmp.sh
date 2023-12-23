@@ -424,7 +424,7 @@ if check_sys rhel; then
     php_conf="/etc/opt/remi/${remi_php}/php-fpm.d/www.conf"
     php_ini="/etc/opt/remi/${remi_php}/php.ini"
     php_fpm="${remi_php}-php-fpm"
-    php_sock="unix//var/opt/remi/php80/run/php-fpm/www.sock"
+    php_sock="unix//var/opt/remi/${remi_php}/run/php-fpm/www.sock"
     sock_location="/var/lib/mysql/mysql.sock"
     if get_rhelversion 8; then
         _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
@@ -457,7 +457,7 @@ elif check_sys debian || check_sys ubuntu; then
     _error_detect "apt-get install -y php${php_ver}-pgsql php${php_ver}-enchant php${php_ver}-gmp php${php_ver}-intl php${php_ver}-ldap php${php_ver}-snmp php${php_ver}-soap"
     _error_detect "apt-get install -y php${php_ver}-mbstring php${php_ver}-curl php${php_ver}-pspell php${php_ver}-xml php${php_ver}-zip php${php_ver}-bz2 php${php_ver}-lz4 php${php_ver}-zstd"
     _error_detect "apt-get install -y php${php_ver}-tidy php${php_ver}-sqlite3 php${php_ver}-imagick php${php_ver}-grpc php${php_ver}-yaml php${php_ver}-uuid"
-    _error_detect "mkdir -m770 /var/lib/php/{session,wsdlcache,opcache}"
+    _error_detect "mkdir -m770 /var/lib/php/${php_ver}/{session,wsdlcache,opcache}"
 fi
 _error_detect "mkdir -p /etc/lcmp/"
 _error_detect "echo "${php_ver}" > /etc/lcmp/phpver"
@@ -468,7 +468,7 @@ _info "PHP installation completed"
 sed -i "s@^user.*@user = caddy@" "${php_conf}"
 sed -i "s@^group.*@group = caddy@" "${php_conf}"
 if check_sys rhel; then
-    sed -i "s@^listen.acl_users.*@listen.acl_users = apache,nginx,caddy@" "${php_conf}"
+    sed -i "s@^listen.acl_users.*@listen.acl_users = apache,caddy@" "${php_conf}"
     sed -i "s@^;php_value\[opcache.file_cache\].*@php_value\[opcache.file_cache\] = /var/opt/remi/${remi_php}/lib/php/opcache@" "${php_conf}"
 elif check_sys debian || check_sys ubuntu; then
     sed -i "s@^listen.owner.*@;&@" "${php_conf}"
@@ -484,9 +484,9 @@ elif check_sys debian || check_sys ubuntu; then
     sed -i "s@^;php_admin_flag\[log_errors\].*@php_admin_flag[log_errors] = on@" "${php_conf}"
     cat >>"${php_conf}" <<EOF
 php_value[session.save_handler] = files
-php_value[session.save_path]    = /var/lib/php/session
-php_value[soap.wsdl_cache_dir]  = /var/lib/php/wsdlcache
-php_value[opcache.file_cache]   = /var/lib/php/opcache
+php_value[session.save_path]    = /var/lib/php/${php_ver}/session
+php_value[soap.wsdl_cache_dir]  = /var/lib/php/${php_ver}/wsdlcache
+php_value[opcache.file_cache]   = /var/lib/php/${php_ver}/opcache
 EOF
 fi
 sed -i "s@^disable_functions.*@disable_functions = passthru,exec,shell_exec,system,chroot,chgrp,chown,proc_open,proc_get_status,ini_alter,ini_alter,ini_restore@" "${php_ini}"
@@ -503,9 +503,9 @@ if check_sys rhel; then
     _error_detect "chown root:caddy /var/opt/remi/${remi_php}/lib/php/wsdlcache"
     _error_detect "chown root:caddy /var/opt/remi/${remi_php}/lib/php/opcache"
 elif check_sys debian || check_sys ubuntu; then 
-    _error_detect "chown root:caddy /var/lib/php/session"
-    _error_detect "chown root:caddy /var/lib/php/wsdlcache"
-    _error_detect "chown root:caddy /var/lib/php/opcache"
+    _error_detect "chown root:caddy /var/lib/php/${php_ver}/session"
+    _error_detect "chown root:caddy /var/lib/php/${php_ver}/wsdlcache"
+    _error_detect "chown root:caddy /var/lib/php/${php_ver}/opcache"
 fi
 _info "Set PHP completed"
 
