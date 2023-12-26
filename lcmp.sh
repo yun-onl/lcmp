@@ -320,7 +320,7 @@ while true; do
     _info "$(_green 1). Source station"
     _info "$(_green 2). China Mirror station"
     read -r -p "[$(date)] Please input a number: (Default 1) " use_cn
-    [ -z "${use_cn}" ] && use_cn=1
+    [ -z "${use_cn}" ] && use_cn=n
     case "${use_cn}" in
     1)
         use_cn="n"
@@ -665,5 +665,17 @@ _info "systemctl status caddy"
 systemctl --no-pager -l status caddy
 echo
 netstat -nxtulpe
+
+## 定义IP地址变量
+ipAddress=`curl -s -4 https://api.ip.sb/ip`
 echo
 _info "LCMP (Linux + Caddy + MariaDB + PHP) installation completed"
+_info "    __    ________  _______               __ "
+_info "   / /   / ____/  |/  / __ \  ____  ___  / /_"
+_info "  / /   / /   / /|_/ / /_/ / / __ \/ _ \/ __/"
+_info " / /___/ /___/ /  / / ____/ / / / /  __/ /_  "
+_info "/_____/\____/_/  /_/_/   (_)_/ /_/\___/\__/  "
+_info "Web Demo Site: http://${ipAddress}"
+_info "Web Demo Dir: /data/www/default"
+_info "Caddy Server Config: /etc/caddy/"
+                                             
