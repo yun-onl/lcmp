@@ -15,6 +15,10 @@
 #
 # Copyright (C) 2023 Cloud.Fan <mail@cloud.fan>
 #
+
+# 定义变量
+phpmyadmin_ver='5.2.1'
+
 trap _exit INT QUIT TERM
 
 cur_dir="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
@@ -309,6 +313,30 @@ _info "---------------------------"
 _info "PHP version = $(_red "${php_ver}")"
 _info "---------------------------"
 
+## 是否使用中国网络加速
+
+_info "Use a mirror server to download files"
+while true; do
+    _info "$(_green 1). Source station"
+    _info "$(_green 2). China Mirror station"
+    read -r -p "[$(date)] Please input a number: (Default 1) " use_cn
+    [ -z "${use_cn}" ] && use_cn=1
+    case "${use_cn}" in
+    1)
+        use_cn="n"
+        break
+        ;;
+    2)
+        use_cn="y"
+        break
+        ;;
+    *)
+        _info "Input error! Please only input a number 1 2"
+        ;;
+    esac
+done
+
+
 _info "Press any key to start...or Press Ctrl+C to cancel"
 char=$(get_char)
 
@@ -390,9 +418,10 @@ sleep 3
 clear
 _info "LCMP (Linux + Caddy + MariaDB + PHP) installation start"
 if check_sys rhel; then
-    if get_rhelversion 8 || get_rhelversion 9; then
-        _error_detect "yum install -yq dnf-plugins-core"
-        _error_detect "yum copr enable -yq @caddy/caddy"
+    _error_detect "yum install -yq dnf-plugins-core"
+    _error_detect "yum copr enable -yq @caddy/caddy"
+    if use_cn="y"; then
+        sed -i 's|https://download.copr.fedorainfracloud.org/|https://caddycopr.mirrors.cloud.fan/|g' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:group_caddy:caddy.repo
     fi
     _error_detect "yum install -yq caddy"
 elif check_sys debian || check_sys ubuntu; then
@@ -400,6 +429,9 @@ elif check_sys debian || check_sys ubuntu; then
     _error_detect "chmod +x caddy-stable_deb.sh"
     _error_detect "./caddy-stable_deb.sh"
     _error_detect "rm -f caddy-stable_deb.sh"
+    if use_cn="y"; then
+        sed -i 's|https://dl.cloudsmith.io/public/caddy/|https://caddydeb.mirrors.cloud.fan/|g' /etc/apt/sources.list.d/caddy-stable.list 
+    fi
     _error_detect "apt-get install -y caddy"
 fi
 _info "Caddy installation completed"
@@ -433,9 +465,15 @@ else
     ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1
     _error_detect "rm -f mariadb_repo_setup.sh"
     if check_sys rhel; then
+            if use_cn="y"; then
+                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g' /etc/yum.repos.d/mariadb.repo
+            fi
         _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
         mariadb_cnf="/etc/my.cnf.d/server.cnf"
     elif check_sys debian || check_sys ubuntu; then
+            if use_cn="y"; then
+                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/repo/debian bookworm main|https://mirrors.aliyun.com/mariadb/repo/${mariadb_ver}/debian bookworm main|g' mariadb.list
+            fi
         _error_detect "apt-get install -y mariadb-common mariadb-server mariadb-client mariadb-backup"
         mariadb_cnf="/etc/MariaDB.conf.d/50-server.cnf"
     fi
@@ -461,7 +499,11 @@ fi
 EOF
     _error_detect "cd /data/www/default"
     # Install phpMyAdmin
-    _error_detect "wget -q https://dl.lamp.sh/files/pma.tar.gz"
+    if use_cn="y"; then
+        _error_detect "wget -qO pma.tar.gz https://pma.mirrors.cloud.fan/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz"
+    else
+        _error_detect "wget -qO pma.tar.gz https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz"
+    fi
     _error_detect "tar zxf pma.tar.gz"
     _error_detect "rm -f pma.tar.gz"
     _error_detect "cd ${cur_dir}"
@@ -477,11 +519,19 @@ if check_sys rhel; then
     php_sock="unix//var/opt/remi/${remi_php}/run/php-fpm/www.sock"
     sock_location="/var/lib/mysql/mysql.sock"
     if get_rhelversion 8; then
-        _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+        if use_cn="y"; then
+            _error_detect "yum install -yq https://mirrors.aliyun.com/remi/enterprise/remi-release-8.rpm"
+        else
+            _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+        fi
         _error_detect "yum install -yq ${remi_php}"
     fi
     if get_rhelversion 9; then
-        _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+        if use_cn="y"; then
+            _error_detect "yum install -yq https://mirrors.aliyun.com/remi/enterprise/remi-release-9.rpm"
+        else
+            _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+        fi
         _error_detect "yum install -yq ${remi_php}"
     fi
     _error_detect "yum install -yq ${remi_php}-php-common ${remi_php}-php-fpm ${remi_php}-php-cli ${remi_php}-php-bcmath ${remi_php}-php-embedded ${remi_php}-php-gd ${remi_php}-php-imap ${remi_php}-php-mysqlnd ${remi_php}-php-dba ${remi_php}-php-pdo ${remi_php}-php-pdo-dblib"
@@ -496,10 +546,17 @@ elif check_sys debian || check_sys ubuntu; then
     sock_location="/run/mysqld/mysqld.sock"
     if check_sys debian; then
         _error_detect "curl -sSLo /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg"
-        echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" >/etc/apt/sources.list.d/php.list
+        if use_cn="y"; then
+            echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://mirror.sjtu.edu.cn/sury/php/ $(lsb_release -sc) main" >/etc/apt/sources.list.d/php.list
+        else
+            echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" >/etc/apt/sources.list.d/php.list
+        fi
     fi
     if check_sys ubuntu; then
         _error_detect "add-apt-repository -y ppa:ondrej/php"
+        if use_cn="y"; then
+            find /etc/apt/sources.list.d/ -type f -name "*.list" -exec  sed  -i.bak -r  's#deb(-src)?\s*http(s)?://ppa.launchpad.net#deb\1 http\2://launchpad.proxy.ustclug.org#ig' {} \;
+        fi
     fi
     _error_detect "apt-get update"
     _error_detect "apt-get install -y php${php_ver}-common php${php_ver}-cli php${php_ver}-fpm php${php_ver}-opcache php${php_ver}-readline"
