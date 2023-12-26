@@ -458,7 +458,7 @@ _info "Set Caddy completed"
 
 ## 安装数据库
 
-if [ "$mariadb_ver" -eq 0 ]; then
+if [ "$mariadb_ver" = 0 ]; then
     _error_detect "touch /etc/lcmp/donotinstallmariadb"
 else
     _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
@@ -522,7 +522,7 @@ if check_sys rhel; then
     sock_location="/var/lib/mysql/mysql.sock"
     if get_rhelversion 8; then
         if use_cn="y"; then
-            _error_detect "yum install -yq https://mirrors.aliyun.com/remi/enterprise/remi-release-8.rpm"
+            _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-8.rpm"
         else
             _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
         fi
@@ -530,7 +530,7 @@ if check_sys rhel; then
     fi
     if get_rhelversion 9; then
         if use_cn="y"; then
-            _error_detect "yum install -yq https://mirrors.aliyun.com/remi/enterprise/remi-release-9.rpm"
+            _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-9.rpm"
         else
             _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
         fi
@@ -566,7 +566,7 @@ elif check_sys debian || check_sys ubuntu; then
     _error_detect "apt-get install -y php${php_ver}-pgsql php${php_ver}-enchant php${php_ver}-gmp php${php_ver}-intl php${php_ver}-ldap php${php_ver}-snmp php${php_ver}-soap"
     _error_detect "apt-get install -y php${php_ver}-mbstring php${php_ver}-curl php${php_ver}-pspell php${php_ver}-xml php${php_ver}-zip php${php_ver}-bz2 php${php_ver}-lz4 php${php_ver}-zstd"
     _error_detect "apt-get install -y php${php_ver}-tidy php${php_ver}-sqlite3 php${php_ver}-imagick php${php_ver}-grpc php${php_ver}-yaml php${php_ver}-uuid"
-    _error_detect "mkdir -m770 /var/lib/php/${php_ver}/{session,wsdlcache,opcache}"
+    _error_detect "mkdir -m770 -p /var/lib/php/${php_ver}/{session,wsdlcache,opcache}"
 fi
 _error_detect "echo "${php_ver}" > /etc/lcmp/phpver"
 _error_detect "echo "${remi_php}" > /etc/lcmp/remiphpver"
