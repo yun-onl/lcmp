@@ -319,9 +319,9 @@ _info "Use a mirror server to download files"
 while true; do
     _info "$(_green 1). Source station"
     _info "$(_green 2). China Mirror station"
-    read -r -p "[$(date)] Please input a number: (Default 1) " use_cn
-    [ -z "${use_cn}" ] && use_cn=n
-    case "${use_cn}" in
+    read -r -p "[$(date)] Please input a number: (Default 1) " use_cnop
+    [ -z "${use_cnop}" ] && use_cnop=1
+    case "${use_cnop}" in
     1)
         use_cn="n"
         break
@@ -468,13 +468,13 @@ else
     _error_detect "rm -f mariadb_repo_setup.sh"
     if check_sys rhel; then
             if use_cn="y"; then
-                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g' /etc/yum.repos.d/mariadb.repo
+                sed -i "s|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g" /etc/yum.repos.d/mariadb.repo
             fi
         _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
         mariadb_cnf="/etc/my.cnf.d/server.cnf"
     elif check_sys debian || check_sys ubuntu; then
             if use_cn="y"; then
-                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/repo/debian bookworm main|https://mirrors.aliyun.com/mariadb/repo/${mariadb_ver}/debian bookworm main|g' mariadb.list
+                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/'${mariadb_ver}'/repo/debian bookworm main|https://mirrors.aliyun.com/mariadb/repo/'${mariadb_ver}'/debian bookworm main|g' mariadb.list
             fi
         _error_detect "apt-get install -y mariadb-common mariadb-server mariadb-client mariadb-backup"
         mariadb_cnf="/etc/MariaDB.conf.d/50-server.cnf"
