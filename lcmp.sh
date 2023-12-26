@@ -425,13 +425,15 @@ if check_sys rhel; then
     fi
     _error_detect "yum install -yq caddy"
 elif check_sys debian || check_sys ubuntu; then
-    _error_detect "wget -qO caddy-stable_deb.sh https://dl.cloudsmith.io/public/caddy/stable/setup.deb.sh"
-    _error_detect "chmod +x caddy-stable_deb.sh"
-    _error_detect "./caddy-stable_deb.sh"
-    _error_detect "rm -f caddy-stable_deb.sh"
+    _error_detect "apt-get install -y debian-keyring debian-archive-keyring apt-transport-https"
+    _error_detect "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg"
     if use_cn="y"; then
-        sed -i 's|https://dl.cloudsmith.io/public/caddy/|https://caddydeb.mirrors.cloud.fan/|g' /etc/apt/sources.list.d/caddy-stable.list 
+
+        _error_detect "curl -1sLf 'https://gitee.com/ivmm/codes/4s7jbpwqvake8r1ol5dhu51/raw?blob_name=caddy.debian.deb.txt' | sudo tee -a /etc/apt/sources.list.d/caddy-stable.list"
+    else
+        _error_detect "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee -a /etc/apt/sources.list.d/caddy-stable.list" 
     fi
+    _error_detect "apt-get update"
     _error_detect "apt-get install -y caddy"
 fi
 _info "Caddy installation completed"
