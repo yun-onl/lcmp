@@ -460,9 +460,7 @@ _info "Set Caddy completed"
 
 ## 安装数据库
 
-if [ "$mariadb_ver" = 0 ]; then
-    _error_detect "touch /etc/lcmp/donotinstallmariadb"
-else
+if [ "$mariadb_ver" != "0" ]; then
     _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     _error_detect "chmod +x mariadb_repo_setup.sh"
     _info "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver}"
@@ -503,7 +501,6 @@ fi
 EOF
     _error_detect "cd /data/www/default"
 
-if [ "$mariadb_ver" != "0" ]; then
     # Install phpMyAdmin
     if use_cn="y"; then
         _error_detect "wget -qO pma.tar.gz https://pma.mirrors.cloud.fan/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz"
