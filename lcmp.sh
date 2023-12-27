@@ -476,7 +476,7 @@ if [ "$mariadb_ver" != "0" ]; then
         mariadb_cnf="/etc/my.cnf.d/server.cnf"
     elif check_sys debian || check_sys ubuntu; then
             if use_cn="y"; then
-                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/'${mariadb_ver}'/repo/debian bookworm main|https://mirrors.aliyun.com/mariadb/repo/'${mariadb_ver}'/debian bookworm main|g' mariadb.list
+                sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/'${mariadb_ver}'/repo/debian bookworm main|https://mirrors.aliyun.com/mariadb/repo/'${mariadb_ver}'/debian bookworm main|g' /etc/apt/sources.list.d/mariadb.list
             fi
         _error_detect "apt-get install -y mariadb-common mariadb-server mariadb-client mariadb-backup"
         mariadb_cnf="/etc/mysql/mariadb.conf.d/50-server.cnf"
