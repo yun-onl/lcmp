@@ -508,6 +508,7 @@ EOF
     fi
     _error_detect "tar zxf pma.tar.gz"
     _error_detect "rm -f pma.tar.gz"
+    _error_detect "mv phpMyAdmin-${phpmyadmin_ver}-all-languages pma"
     _error_detect "cd ${cur_dir}"
     _info "/usr/bin/mysql -uroot -p 2>/dev/null < /data/www/default/pma/sql/create_tables.sql"
     /usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null </data/www/default/pma/sql/create_tables.sql
@@ -667,7 +668,7 @@ echo
 netstat -nxtulpe
 
 ## 定义IP地址变量
-ipAddress=`curl -s -4 https://api.ip.sb/ip`
+ipAddress=`curl -s -4 https://ping0.cc`
 echo
 _info "LCMP (Linux + Caddy + MariaDB + PHP) installation completed"
 _info "    __    ________  _______               __ "
