@@ -480,7 +480,6 @@ if [ "$mariadb_ver" != "0" ]; then
         mariadb_cnf="/etc/MariaDB.conf.d/50-server.cnf"
     fi
     _info "MariaDB installation completed"
-fi
 
     lnum=$(sed -n '/\[mysqld\]/=' "${mariadb_cnf}")
     sed -i "${lnum}ainnodb_buffer_pool_size = 100M\nmax_allowed_packet = 1024M\nnet_read_timeout = 3600\nnet_write_timeout = 3600" "${mariadb_cnf}"
