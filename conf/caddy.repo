@@ -1,0 +1,10 @@
+[copr:copr.fedorainfracloud.org:group_caddy:caddy]
+name=Copr repo for caddy owned by @caddy
+baseurl=https://caddycopr.mirrors.cloud.fan/results/@caddy/caddy/epel-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://caddycopr.mirrors.cloud.fan/results/@caddy/caddy/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1

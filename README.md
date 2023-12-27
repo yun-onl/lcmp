@@ -19,7 +19,7 @@ chmod 755 *.sh
 
 ```bash
 yum -y install wget git
-https://gitee.com/yunonl/lcmp.git
+git clone https://gitee.com/yunonl/lcmp.git
 cd lcmp
 chmod 755 *.sh
 ./lcmp.sh 2>&1 | tee lcmp.log
@@ -28,7 +28,7 @@ chmod 755 *.sh
 - If your server's OS: Debian 10+ / Ubuntu 20.04+
 ```bash
 apt-get -y install wget git
-https://gitee.com/yunonl/lcmp.git
+git clone https://gitee.com/yunonl/lcmp.git
 cd lcmp
 chmod 755 *.sh
 ./lcmp.sh 2>&1 | tee lcmp.log

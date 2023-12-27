@@ -420,10 +420,12 @@ sleep 3
 clear
 _info "LCMP (Linux + Caddy + MariaDB + PHP) installation start"
 if check_sys rhel; then
-    _error_detect "yum install -yq dnf-plugins-core"
-    _error_detect "yum copr enable -yq @caddy/caddy"
+
     if use_cn="y"; then
-        sed -i 's|https://download.copr.fedorainfracloud.org/|https://caddycopr.mirrors.cloud.fan/|g' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:group_caddy:caddy.repo
+        yum-config-manager --add-repo https://gitee.com/yunonl/lcmp/raw/main/conf/caddy.repo
+    else
+        _error_detect "yum install -yq dnf-plugins-core"
+        _error_detect "yum copr enable -yq @caddy/caddy"
     fi
     _error_detect "yum install -yq caddy"
 elif check_sys debian || check_sys ubuntu; then
