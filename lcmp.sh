@@ -249,14 +249,16 @@ while true; do
 done
 
 # Set MariaDB root password
-_info "Please input the root password of MariaDB:"
-read -r -p "[$(date)] (Default password: lcmp-net):" db_pass
-if [ -z "${db_pass}" ]; then
-    db_pass="lcmp-net"
+if [ "$mariadb_ver" != "0" ]; then
+    _info "Please input the root password of MariaDB:"
+    read -r -p "[$(date)] (Default password: lcmp-net):" db_pass
+    if [ -z "${db_pass}" ]; then
+        db_pass="lcmp-net"
+    fi
+    _info "---------------------------"
+    _info "Password = $(_red "${db_pass}")"
+    _info "---------------------------"
 fi
-_info "---------------------------"
-_info "Password = $(_red "${db_pass}")"
-_info "---------------------------"
 
 # Choose PHP version
 while true; do
@@ -500,6 +502,8 @@ fi
     exit
 EOF
     _error_detect "cd /data/www/default"
+
+if [ "$mariadb_ver" != "0" ]; then
     # Install phpMyAdmin
     if use_cn="y"; then
         _error_detect "wget -qO pma.tar.gz https://pma.mirrors.cloud.fan/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz"
@@ -513,7 +517,7 @@ EOF
     _info "/usr/bin/mysql -uroot -p 2>/dev/null < /data/www/default/pma/sql/create_tables.sql"
     /usr/bin/mysql -uroot -p"${db_pass}" 2>/dev/null </data/www/default/pma/sql/create_tables.sql
     _info "Set MariaDB ${mariadb_ver} completed"
-
+fi
 
 if check_sys rhel; then
     php_conf="/etc/opt/remi/${remi_php}/php-fpm.d/www.conf"
