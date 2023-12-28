@@ -362,11 +362,13 @@ if check_sys rhel; then
     if get_rhelversion 8; then
         yum-config-manager --enable powertools >/dev/null 2>&1 || yum-config-manager --enable PowerTools >/dev/null 2>&1
         _info "Set enable PowerTools Repository completed"
+        rhelver="8"
     fi
     if get_rhelversion 9; then
         _error_detect "yum-config-manager --enable crb"
         _info "Set enable CRB Repository completed"
         echo "set enable-bracketed-paste off" >>/etc/inputrc
+        rhelver="9"
     fi
     _error_detect "yum install -yq vim tar zip unzip net-tools bind-utils screen git virt-what wget whois firewalld mtr traceroute iftop htop jq tree"
     if [ -s "/etc/selinux/config" ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
@@ -476,8 +478,11 @@ _info "Set Caddy completed"
 if [ "$mariadb_ver" != "0" ]; then
     _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     _error_detect "chmod +x mariadb_repo_setup.sh"
-    _info "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver}"
-    ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1
+    if [ -f /etc/anolis-release ]; then
+        ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} --os-type=rhel --os-version=${rhelver} >/dev/null 2>&1
+    else
+        ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1
+    fi
     _error_detect "rm -f mariadb_repo_setup.sh"
     if check_sys rhel; then
             if use_cn="y"; then
@@ -534,22 +539,27 @@ if check_sys rhel; then
     php_fpm="${remi_php}-php-fpm"
     php_sock="unix//var/opt/remi/${remi_php}/run/php-fpm/www.sock"
     sock_location="/var/lib/mysql/mysql.sock"
-    if get_rhelversion 8; then
-        if use_cn="y"; then
-            _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-8.rpm"
+
+    if use_cn="y"; then
+        if [ -f /etc/anolis-release ]; then
+            _error_detect "wget https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-${rhelver}.rpm"
+            _error_detect "rpm -ivh --force remi-release-8.rpm"
+            _error_detect "rm -f remi-release-8.rpm"
         else
-            _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+            _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-${rhelver}.rpm"
         fi
-        _error_detect "yum install -yq ${remi_php}"
-    fi
-    if get_rhelversion 9; then
-        if use_cn="y"; then
-            _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-9.rpm"
+    else
+        if [ -f /etc/anolis-release ]; then
+            _error_detect "wget https://rpms.remirepo.net/enterprise/remi-release-${rhelver}.rpm"
+             _error_detect "rpm -ivh --force remi-release-8.rpm"
+             _error_detect "rm -f remi-release-8.rpm"
         else
-            _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+            _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-${rhelver}.rpm"
         fi
-        _error_detect "yum install -yq ${remi_php}"
     fi
+    
+    _error_detect "yum install -yq ${remi_php}"
+
     _error_detect "yum install -yq ${remi_php}-php-common ${remi_php}-php-fpm ${remi_php}-php-cli ${remi_php}-php-bcmath ${remi_php}-php-embedded ${remi_php}-php-gd ${remi_php}-php-imap ${remi_php}-php-mysqlnd ${remi_php}-php-dba ${remi_php}-php-pdo ${remi_php}-php-pdo-dblib"
     _error_detect "yum install -yq ${remi_php}-php-pgsql ${remi_php}-php-enchant ${remi_php}-php-gmp ${remi_php}-php-intl ${remi_php}-php-ldap ${remi_php}-php-snmp ${remi_php}-php-soap ${remi_php}-php-tidy ${remi_php}-php-opcache ${remi_php}-php-process"
     _error_detect "yum install -yq ${remi_php}-php-pspell ${remi_php}-php-shmop ${remi_php}-php-sodium ${remi_php}-php-ffi ${remi_php}-php-brotli ${remi_php}-php-lz4 ${remi_php}-php-xz ${remi_php}-php-zstd ${remi_php}-php-pecl-rar"
