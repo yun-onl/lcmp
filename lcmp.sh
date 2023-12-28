@@ -479,14 +479,14 @@ if [ "$mariadb_ver" != "0" ]; then
     _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     _error_detect "chmod +x mariadb_repo_setup.sh"
     if [ -f /etc/anolis-release ]; then
-        ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} --os-type=rhel --os-version=${rhelver} >/dev/null 2>&1
+        _error_detect "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} --os-type=rhel --os-version=${rhelver} >/dev/null 2>&1"
     else
-        ./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1
+        _error_detect "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1"
     fi
     _error_detect "rm -f mariadb_repo_setup.sh"
     if check_sys rhel; then
             if use_cn="y"; then
-                sed -i "s|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g" /etc/yum.repos.d/mariadb.repo
+                _error_detect "sed -i "s|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g" /etc/yum.repos.d/mariadb.repo"
             fi
         _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
         mariadb_cnf="/etc/my.cnf.d/server.cnf"
@@ -543,16 +543,16 @@ if check_sys rhel; then
     if use_cn="y"; then
         if [ -f /etc/anolis-release ]; then
             _error_detect "wget https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-${rhelver}.rpm"
-            _error_detect "rpm -ivh --force remi-release-8.rpm"
-            _error_detect "rm -f remi-release-8.rpm"
+            _error_detect "rpm -ivh --nodeps --force remi-release-${rhelver}.rpm"
+            _error_detect "rm -f remi-release-${rhelver}.rpm"
         else
             _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-${rhelver}.rpm"
         fi
     else
         if [ -f /etc/anolis-release ]; then
             _error_detect "wget https://rpms.remirepo.net/enterprise/remi-release-${rhelver}.rpm"
-             _error_detect "rpm -ivh --force remi-release-8.rpm"
-             _error_detect "rm -f remi-release-8.rpm"
+             _error_detect "rpm -ivh --nodeps --force remi-release-${rhelver}.rpm"
+             _error_detect "rm -f remi-release-${rhelver}.rpm"
         else
             _error_detect "yum install -yq https://rpms.remirepo.net/enterprise/remi-release-${rhelver}.rpm"
         fi
