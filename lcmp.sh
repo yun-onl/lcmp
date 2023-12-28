@@ -486,7 +486,7 @@ if [ "$mariadb_ver" != "0" ]; then
     _error_detect "rm -f mariadb_repo_setup.sh"
     if check_sys rhel; then
             if use_cn="y"; then
-                _error_detect "sed -i "s|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g" /etc/yum.repos.d/mariadb.repo"
+                _error_detect "sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g' /etc/yum.repos.d/mariadb.repo"
             fi
         _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
         mariadb_cnf="/etc/my.cnf.d/server.cnf"
@@ -563,7 +563,7 @@ if check_sys rhel; then
     _error_detect "yum install -yq ${remi_php}-php-common ${remi_php}-php-fpm ${remi_php}-php-cli ${remi_php}-php-bcmath ${remi_php}-php-embedded ${remi_php}-php-gd ${remi_php}-php-imap ${remi_php}-php-mysqlnd ${remi_php}-php-dba ${remi_php}-php-pdo ${remi_php}-php-pdo-dblib"
     _error_detect "yum install -yq ${remi_php}-php-pgsql ${remi_php}-php-enchant ${remi_php}-php-gmp ${remi_php}-php-intl ${remi_php}-php-ldap ${remi_php}-php-snmp ${remi_php}-php-soap ${remi_php}-php-tidy ${remi_php}-php-opcache ${remi_php}-php-process"
     _error_detect "yum install -yq ${remi_php}-php-pspell ${remi_php}-php-shmop ${remi_php}-php-sodium ${remi_php}-php-ffi ${remi_php}-php-brotli ${remi_php}-php-lz4 ${remi_php}-php-xz ${remi_php}-php-zstd ${remi_php}-php-pecl-rar"
-    _error_detect "yum install -yq ${remi_php}-php-pecl-imagick-im7 ${remi_php}-php-pecl-zip ${remi_php}-php-pecl-grpc ${remi_php}-php-pecl-yaml ${remi_php}-php-pecl-uuid composer"
+    _error_detect "yum install -yq ${remi_php}-php-pecl-zip ${remi_php}-php-pecl-grpc ${remi_php}-php-pecl-yaml ${remi_php}-php-pecl-uuid composer"
 elif check_sys debian || check_sys ubuntu; then
     php_conf="/etc/php/${php_ver}/fpm/pool.d/www.conf"
     php_ini="/etc/php/${php_ver}/fpm/php.ini"
