@@ -6,7 +6,6 @@
 # Supported OS:
 # Enterprise Linux 8 (CentOS 8, RHEL 8, Rocky Linux 8, AlmaLinux 8, Oracle Linux 8, openAnolis 8, OpenCloudOS 8)
 # Enterprise Linux 9 (CentOS 9, RHEL 9, Rocky Linux 9, AlmaLinux 9, Oracle Linux 9, OpenCloudOS 9)
-# AliyunLinux（AliyunLinux3, openAnolis 23）
 # Debian 10
 # Debian 11
 # Debian 12
@@ -200,6 +199,14 @@ check_bbr_status() {
     fi
 }
 
+## Anolis 兼容
+
+# 检查 /etc/anolis-release 文件是否存在
+if [ -f /etc/anolis-release ]; then
+    # 如果文件存在，则创建一个指向它的软链接
+    ln -s /etc/anolis-release /etc/redhat-release
+fi
+
 # Check user
 [ ${EUID} -ne 0 ] && _red "This script must be run as root!\n" && exit 1
 
@@ -346,7 +353,11 @@ _info "Server initialization start"
 _error_detect "rm -f /etc/localtime"
 _error_detect "ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime"
 if check_sys rhel; then
-    _error_detect "yum install -yq yum-utils epel-release"
+    if [ -f /etc/anolis-release ]; then
+        yum install -yq yum-utils epel-aliyuncs-release
+    else
+        yum install -yq yum-utils epel-release
+    fi
     _error_detect "yum-config-manager --enable epel"
     if get_rhelversion 8; then
         yum-config-manager --enable powertools >/dev/null 2>&1 || yum-config-manager --enable PowerTools >/dev/null 2>&1
