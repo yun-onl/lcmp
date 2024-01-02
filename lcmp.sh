@@ -490,14 +490,11 @@ if [ "$mariadb_ver" != "0" ]; then
                 _info "Create MariaDB.repo file for China network acceleration"
                 cat <<EOF | tee /etc/yum.repos.d/mariadb.repo
 # MariaDB $mariadb_ver RedHatEnterpriseLinux repository list - created by lcmp.net
-# https://mariadb.org/download/
 [mariadb]
 name = MariaDB
-# rpm.mariadb.org is a dynamic mirror if your preferred mirror goes offline. See https://mariadb.org/mirrorbits/ for details.
-# baseurl = https://rpm.mariadb.org/$mariadb_ver/rhel/$rhelver/\$basearch
-baseurl = https://mirrors.aliyun.com/mariadb/yum/$mariadb_ver/rhel/$rhelver/\$basearch
-# gpgkey = https://rpm.mariadb.org/RPM-GPG-KEY-MariaDB
+baseurl = https://mirrors.aliyun.com/mariadb/yum/$mariadb_ver/rhel/\$releasever/\$basearch
 gpgkey = https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
+enabled=1
 gpgcheck = 1
 EOF
             fi
