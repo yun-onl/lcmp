@@ -494,7 +494,7 @@ if [ "$mariadb_ver" != "0" ]; then
 name = MariaDB
 baseurl = https://mirrors.aliyun.com/mariadb/yum/$mariadb_ver/rhel/\$releasever/\$basearch
 gpgkey = https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
-enabled=1
+module_hotfixes = 1
 gpgcheck = 1
 EOF
             fi
