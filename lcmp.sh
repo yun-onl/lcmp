@@ -486,7 +486,20 @@ if [ "$mariadb_ver" != "0" ]; then
     _error_detect "rm -f mariadb_repo_setup.sh"
     if check_sys rhel; then
             if use_cn="y"; then
-                _error_detect "sed -i 's|https://dlm.mariadb.com/repo/mariadb-server/${mariadb_ver}/yum/rhel/|https://mirrors.aliyun.com/mariadb/yum/${mariadb_ver}/rhel/|g' /etc/yum.repos.d/mariadb.repo"
+                _error_detect "rm -rf  /etc/yum.repos.d/mariadb.repo"
+                _info "Create MariaDB.repo file for China network acceleration"
+                cat <<EOF | tee /etc/yum.repos.d/mariadb.repo
+# MariaDB $mariadb_ver RedHatEnterpriseLinux repository list - created by lcmp.net
+# https://mariadb.org/download/
+[mariadb]
+name = MariaDB
+# rpm.mariadb.org is a dynamic mirror if your preferred mirror goes offline. See https://mariadb.org/mirrorbits/ for details.
+# baseurl = https://rpm.mariadb.org/\$mariadb_ver/rhel/\$releasever/\$basearch
+baseurl = https://mirrors.aliyun.com/mariadb/yum/\$mariadb_ver/rhel/\$releasever/\$basearch
+# gpgkey = https://rpm.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgkey = https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
+gpgcheck = 1
+EOF
             fi
         _error_detect "yum install -y MariaDB-common MariaDB-server MariaDB-client MariaDB-shared MariaDB-backup"
         mariadb_cnf="/etc/my.cnf.d/server.cnf"
