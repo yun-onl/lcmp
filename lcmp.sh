@@ -494,8 +494,8 @@ if [ "$mariadb_ver" != "0" ]; then
 [mariadb]
 name = MariaDB
 # rpm.mariadb.org is a dynamic mirror if your preferred mirror goes offline. See https://mariadb.org/mirrorbits/ for details.
-# baseurl = https://rpm.mariadb.org/$mariadb_ver/rhel/\$releasever/\$basearch
-baseurl = https://mirrors.aliyun.com/mariadb/yum/$mariadb_ver/rhel/\$releasever/\$basearch
+# baseurl = https://rpm.mariadb.org/$mariadb_ver/rhel/$rhelver/\$basearch
+baseurl = https://mirrors.aliyun.com/mariadb/yum/$mariadb_ver/rhel/$rhelver/\$basearch
 # gpgkey = https://rpm.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgkey = https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
 gpgcheck = 1
