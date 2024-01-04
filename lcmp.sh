@@ -360,8 +360,12 @@ _error_detect "ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime"
 if check_sys rhel; then
     if [ -f /etc/anolis-release ]; then
         yum install -yq yum-utils epel-aliyuncs-release
-    elif if [ -f /etc/opencloudos-release ]; then
-         yum-config-manager --add-repo https://gitee.com/yunonl/lcmp/raw/main/conf/epel.repo
+    elif [ -f /etc/opencloudos-release ]; then
+        if use_cn="y"; then
+            yum-config-manager --add-repo https://gitee.com/yunonl/lcmp/raw/main/conf/epelcn.repo
+        else
+            yum-config-manager --add-repo https://raw.githubusercontent.com/yun-onl/lcmp/main/conf/epel.repo
+        fi
     else
         yum install -yq yum-utils epel-release
     fi
@@ -372,8 +376,10 @@ if check_sys rhel; then
         rhelver="8"
     fi
     if get_rhelversion 9; then
-        _error_detect "yum-config-manager --enable crb"
-        _info "Set enable CRB Repository completed"
+        if [ ! -f /etc/opencloudos-release ]; then
+            _error_detect "yum-config-manager --enable crb"
+            _info "Set enable CRB Repository completed"
+        fi
         echo "set enable-bracketed-paste off" >>/etc/inputrc
         rhelver="9"
     fi
