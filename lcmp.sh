@@ -354,6 +354,14 @@ done
 _info "Press any key to start...or Press Ctrl+C to cancel"
 char=$(get_char)
 
+if get_rhelversion 8; then
+    rhelver="8"
+fi
+
+if get_rhelversion 9; then
+    rhelver="9"
+fi
+
 _info "Server initialization start"
 _error_detect "rm -f /etc/localtime"
 _error_detect "ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime"
@@ -361,10 +369,17 @@ if check_sys rhel; then
     if [ -f /etc/anolis-release ]; then
         yum install -yq yum-utils epel-aliyuncs-release
     elif [ -f /etc/opencloudos-release ]; then
+cat <<EOL >> /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux $rhelver - \$basearch
+baseurl=https://mirror.facebook.net/fedora/epel/$rhelver/Everything/\$basearch
+enabled=1
+gpgcheck=1
+countme=1
+gpgkey=https://mirror.facebook.net/fedora/epel/RPM-GPG-KEY-EPEL-$rhelver
+EOL
         if use_cn="y"; then
-            yum-config-manager --add-repo https://gitee.com/yunonl/lcmp/raw/main/conf/epelcn.repo
-        else
-            yum-config-manager --add-repo https://raw.githubusercontent.com/yun-onl/lcmp/main/conf/epel.repo
+            _error_detect "sed -i 's|mirror.facebook.net/fedora|mirrors.ustc.edu.cn|g' /etc/yum.repos.d/epel.repo"
         fi
     else
         yum install -yq yum-utils epel-release
@@ -373,7 +388,6 @@ if check_sys rhel; then
     if get_rhelversion 8; then
         yum-config-manager --enable powertools >/dev/null 2>&1 || yum-config-manager --enable PowerTools >/dev/null 2>&1
         _info "Set enable PowerTools Repository completed"
-        rhelver="8"
     fi
     if get_rhelversion 9; then
         if [ ! -f /etc/opencloudos-release ]; then
@@ -381,9 +395,8 @@ if check_sys rhel; then
             _info "Set enable CRB Repository completed"
         fi
         echo "set enable-bracketed-paste off" >>/etc/inputrc
-        rhelver="9"
     fi
-    _error_detect "yum install -yq vim tar zip unzip net-tools bind-utils screen git virt-what wget whois firewalld mtr traceroute iftop htop jq tree"
+    _error_detect "yum install -yq vim tar zip unzip net-tools bind-utils git virt-what wget whois firewalld mtr traceroute iftop htop jq tree"
     if [ -s "/etc/selinux/config" ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's@^SELINUX.*@SELINUX=disabled@g' /etc/selinux/config
         setenforce 0
@@ -405,7 +418,7 @@ if check_sys rhel; then
 elif check_sys debian || check_sys ubuntu; then
     _error_detect "apt-get update"
     _error_detect "apt-get -yq install lsb-release ca-certificates curl"
-    _error_detect "apt-get -yq install vim tar zip unzip net-tools bind9-utils screen git virt-what wget whois mtr traceroute iftop htop jq tree"
+    _error_detect "apt-get -yq install vim tar zip unzip net-tools bind9-utils git virt-what wget whois mtr traceroute iftop htop jq tree"
     if ufw status >/dev/null 2>&1; then
         _error_detect "ufw allow http"
         _error_detect "ufw allow https"
