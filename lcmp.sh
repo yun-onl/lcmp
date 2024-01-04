@@ -206,11 +206,6 @@ if [ -f /etc/anolis-release ]; then
     # 如果文件存在，则创建一个指向它的软链接
     ln -s /etc/anolis-release /etc/redhat-release
 fi
-   
-if [ -f /etc/opencloudos-release ]; then
-    # 如果文件存在，则创建一个指向它的软链接
-    ln -s /etc/opencloudos-release /etc/redhat-release
-fi
 
 # Check user
 [ ${EUID} -ne 0 ] && _red "This script must be run as root!\n" && exit 1
@@ -360,8 +355,6 @@ _error_detect "ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime"
 if check_sys rhel; then
     if [ -f /etc/anolis-release ]; then
         yum install -yq yum-utils epel-aliyuncs-release
-    elif if [ -f /etc/opencloudos-release ]; then
-         yum-config-manager --add-repo https://gitee.com/yunonl/lcmp/raw/main/conf/epel.repo
     else
         yum install -yq yum-utils epel-release
     fi
@@ -485,7 +478,7 @@ _info "Set Caddy completed"
 if [ "$mariadb_ver" != "0" ]; then
     _error_detect "wget -qO mariadb_repo_setup.sh https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
     _error_detect "chmod +x mariadb_repo_setup.sh"
-    if [ -f /etc/anolis-release ] || [ -f /etc/opencloudos-release ]; then
+    if [ -f /etc/anolis-release ]; then
         _error_detect "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} --os-type=rhel --os-version=${rhelver} >/dev/null 2>&1"
     else
         _error_detect "./mariadb_repo_setup.sh --mariadb-server-version=mariadb-${mariadb_ver} >/dev/null 2>&1"
@@ -558,7 +551,7 @@ if check_sys rhel; then
     sock_location="/var/lib/mysql/mysql.sock"
 
     if use_cn="y"; then
-        if [ -f /etc/anolis-release ] || [ -f /etc/opencloudos-release ]; then
+        if [ -f /etc/anolis-release ]; then
             _error_detect "wget https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-${rhelver}.rpm"
             _error_detect "rpm -ivh --nodeps --force remi-release-${rhelver}.rpm"
             _error_detect "rm -f remi-release-${rhelver}.rpm"
@@ -566,7 +559,7 @@ if check_sys rhel; then
             _error_detect "yum install -yq https://mirrors.ustc.edu.cn/remi/enterprise/remi-release-${rhelver}.rpm"
         fi
     else
-        if [ -f /etc/anolis-release ] || [ -f /etc/opencloudos-release ]; then
+        if [ -f /etc/anolis-release ]; then
             _error_detect "wget https://rpms.remirepo.net/enterprise/remi-release-${rhelver}.rpm"
              _error_detect "rpm -ivh --nodeps --force remi-release-${rhelver}.rpm"
              _error_detect "rm -f remi-release-${rhelver}.rpm"
