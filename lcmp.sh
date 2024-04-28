@@ -443,7 +443,7 @@ if check_sys rhel; then
     _error_detect "yum install -yq caddy"
 elif check_sys debian || check_sys ubuntu; then
     _error_detect "apt-get install -y debian-keyring debian-archive-keyring apt-transport-https"
-    _error_detect "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg"
+    _error_detect "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg"
     if use_cn="y"; then
 
         _error_detect "curl -1sLf 'https://gitee.com/yunonl/lcmp/raw/main/conf/caddy.debian.deb.txt' | sudo tee -a /etc/apt/sources.list.d/caddy-stable.list"
